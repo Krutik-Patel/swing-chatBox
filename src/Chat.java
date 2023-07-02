@@ -2,6 +2,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,14 +83,22 @@ public class Chat {
     }
 
     private void addTopPanel() {
-        ImageIcon i1 = new ImageIcon(USER_IMG_PATH);
-        Image i2 = i1.getImage().getScaledInstance(42, 42, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
+        ImageIcon i1, i3;
+        Image i2;
+        JLabel greta;
+        if (Files.exists(Paths.get(USER_IMG_PATH))) {
+        i1 = new ImageIcon(USER_IMG_PATH);
+            i2 = i1.getImage().getScaledInstance(42, 42, Image.SCALE_DEFAULT);
+            i3 = new ImageIcon(i2);
+            greta = new JLabel("GRETA", i3, SwingConstants.LEADING);
+        } else {
+            System.out.println("GRETA Image not found...");
+            greta = new JLabel("GRETA", SwingConstants.LEADING);
+        }
         topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
         topPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
         topPanel.setBackground(Color.decode("#255c99"));
-        JLabel greta = new JLabel("GRETA", i3, SwingConstants.LEADING);
         greta.setFont(new Font("SANS-SERIF", Font.BOLD, 24));
         greta.setForeground(Color.WHITE);
         topPanel.add(greta, BorderLayout.CENTER);
