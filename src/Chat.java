@@ -12,7 +12,7 @@ import javafx.scene.layout.Border;
 
 import java.util.ArrayList;
 
-public class Chat implements ActionListener {
+public class Chat {
     private JFrame frame;
     private JPanel mainPanel, textPanel, sendPanel, topPanel;
     private String chatBoxTitle = "ChatBox";
@@ -20,14 +20,30 @@ public class Chat implements ActionListener {
     private JScrollPane scrollPane;
     private JButton sendButton;
     private ArrayList<MessageItem> msgList;
+    private String newMessage;
+    private final Object monitor = new Object();
+    private String USER_IMG_PATH = "./images/Usr.png";
 
     public enum Author {
         USER,
         GRETA
     }
 
-    public void init() {
-        new Chat();
+    public static Chat init() {
+        Chat thisChat = new Chat();
+        return thisChat;
+    }
+
+    public void pushMessageToUser(String message) {
+        Box msgFromGreta = createMessageArea(message, Author.GRETA);
+        textPanel.add(msgFromGreta);
+        frame.validate();
+        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+    }
+
+    public synchronized String getMessageFromUser() throws Exception {
+        wait();
+        return newMessage;
     }
 
     private Chat() {
@@ -65,8 +81,7 @@ public class Chat implements ActionListener {
     }
 
     private void addTopPanel() {
-
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("./images/Usr.png"));
+        ImageIcon i1 = new ImageIcon(USER_IMG_PATH);
         Image i2 = i1.getImage().getScaledInstance(42, 42, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         topPanel = new JPanel();
@@ -133,23 +148,28 @@ public class Chat implements ActionListener {
         sendButton.setBorder(null);
         frame.getRootPane().setDefaultButton(sendButton);
         sendButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+            public synchronized void actionPerformed(ActionEvent e) {
 
                 String msg = messageField.getText();
                 if (msg.equals("")) {
                     return;
                 }
-                System.out.println(msg);
+                // System.out.println(msg);
 
-                Box newMsgArea = createMessageArea(msg, Author.USER, e);
+                Box newMsgArea = createMessageArea(msg, Author.USER);
                 textPanel.add(newMsgArea);
-                frame.validate();
-                Box newMsgArea1 = createMessageArea(msg, Author.GRETA, e);
-                textPanel.add(newMsgArea1);
                 frame.validate();
                 scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
 
                 messageField.setText("");
+
+                newMessage = msg;
+                try {
+                    callNotify();
+                } catch (Exception e1) {
+                    System.out.println("Oops");
+                    e1.printStackTrace();
+                }
             }
         });
 
@@ -158,7 +178,11 @@ public class Chat implements ActionListener {
 
     }
 
-    private Box createMessageArea(String msg, Author author, ActionEvent e) {
+    private synchronized void callNotify() throws Exception {
+        notify();
+    }
+
+    private Box createMessageArea(String msg, Author author) {
         Color textAreaColour = Color.WHITE, foregroundColour = Color.WHITE;
         float textAlignment = Component.LEFT_ALIGNMENT;
         if (author == Author.USER) {
@@ -211,6 +235,7 @@ public class Chat implements ActionListener {
     public static void main(String[] args) throws Exception {
 
         new Chat();
+
 
     }
 
