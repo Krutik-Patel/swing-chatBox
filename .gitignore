@@ -1,3 +1,5 @@
 .vscode/
 bin/
-../src/user_1.java
+src/user_1.java
+src/newChat.java
+src/GroupPanel.java
